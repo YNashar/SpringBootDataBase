@@ -1,0 +1,98 @@
+<div class="student-management-container">
+  <h1>University Database</h1>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="validationMessage" class="validation-message">{{ validationMessage }}</div>
+  <div class="section">
+    <h2>Student Management</h2>
+    <form [formGroup]="studentForm" (ngSubmit)="editingStudent ? updateStudent() : addStudent()" class="student-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="studentName">Student Name *</label>
+          <input id="studentName" formControlName="studentName" placeholder="Enter student name" />
+        </div>
+        <div class="form-group">
+          <label for="nationalId">National ID *</label>
+          <input id="nationalId" formControlName="nationalId" placeholder="Enter 16-digit national ID" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="facultyId">Faculty *</label>
+          <select id="facultyId" formControlName="facultyId" (change)="onFacultyChange()">
+            <option value="0">Select Faculty</option>
+            <option *ngFor="let faculty of faculties" [value]="faculty.facultyId">
+              {{ faculty.facultyName }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="level">Level *</label>
+          <select id="level" formControlName="level">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+          </select>
+        </div>
+      </div>
+      <div *ngIf="studentForm.get('facultyId')?.value > 0 && courses.length > 0" class="form-group">
+        <label>Courses & Grades</label>
+        <div class="courses-grades-list">
+          <div *ngFor="let course of courses" class="course-grade-item">
+            <label>
+              <input type="checkbox" [value]="course.courseId!" (change)="onCourseCheckboxChange(course, $event)" [checked]="isCourseSelected(course.courseId!)" />
+              {{ course.courseName }}
+            </label>
+            <input *ngIf="isCourseSelected(course.courseId!)" type="number" min="0" max="100" placeholder="Grade"
+              [value]="selectedCoursesWithGrades[course.courseId!]"
+              (input)="onGradeInput(course.courseId!, $event)"
+              class="grade-input" />
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="studentForm.invalid" class="btn-primary">
+          {{ editingStudent ? 'Update' : 'Add' }} Student
+        </button>
+        <button type="button" *ngIf="editingStudent" (click)="cancelEdit()" class="btn-secondary">
+          Cancel
+        </button>
+      </div>
+    </form>
+    <div class="students-list">
+      <h3>Students</h3>
+      <div class="table-container">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>National ID</th>
+              <th>Faculty</th>
+              <th>Level</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of students" 
+                [class.selected]="selectedStudent?.studentId === student.studentId"
+                (click)="selectStudent(student)">
+              <td>{{ student.studentId }}</td>
+              <td>{{ student.studentName }}</td>
+              <td>{{ student.nationalId }}</td>
+              <td>{{ getFacultyName(student.facultyId) }}</td>
+              <td>{{ student.level }}</td>
+              <td>
+                <button (click)="startEditStudent(student); $event.stopPropagation()" class="btn-edit">
+                  Edit
+                </button>
+                <button (click)="deleteStudent(student.studentId!); $event.stopPropagation()" class="btn-delete">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

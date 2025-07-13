@@ -1,0 +1,40 @@
+<h2>Courses</h2>
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+<form [formGroup]="courseForm" (ngSubmit)="submit()" class="course-form">
+  <input formControlName="course_name" placeholder="Course Name" />
+  <select formControlName="faculty_id">
+    <option value="" disabled selected>Select Faculty</option>
+    <option *ngFor="let faculty of faculties" [value]="faculty.facultyId">{{ faculty.facultyName }}</option>
+  </select>
+  <input formControlName="level" type="number" min="1" max="6" placeholder="Level (1-6)" />
+  <button type="submit" [disabled]="courseForm.invalid">
+    {{ editingCourse ? 'Update' : 'Add' }} Course
+  </button>
+  <button type="button" *ngIf="editingCourse" (click)="cancelEdit()">Cancel</button>
+</form>
+
+<table class="course-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Faculty</th>
+      <th>Level</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let course of courses">
+      <td>{{ course.course_id }}</td>
+      <td>{{ course.course_name }}</td>
+      <td>{{ getFacultyName(course.faculty_id) }}</td>
+      <td>{{ course.level }}</td>
+      <td>
+        <button (click)="startEdit(course)">Edit</button>
+        <button (click)="deleteCourse(course)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

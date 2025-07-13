@@ -1,0 +1,110 @@
+<div class="enrollments-container">
+  <h2>Enrollments Management</h2>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="close-btn">&times;</button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="loading">
+    <span>Loading enrollments...</span>
+  </div>
+
+  <!-- Enrollment Form -->
+  <div class="form-section">
+    <h3>{{ editingEnrollment ? 'Edit' : 'Add New' }} Enrollment</h3>
+    <form [formGroup]="enrollmentForm" (ngSubmit)="submit()" class="enrollment-form">
+      <div class="form-group">
+        <label for="studentId">Student:</label>
+        <select id="studentId" formControlName="studentId" class="form-control">
+          <option value="" disabled selected>Select Student</option>
+          <option *ngFor="let student of students" [value]="student.studentId">
+            {{ student.studentName }} (ID: {{ student.studentId }})
+          </option>
+        </select>
+        <div *ngIf="enrollmentForm.get('studentId')?.invalid && enrollmentForm.get('studentId')?.touched" class="error-text">
+          Please select a student
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="courseId">Course:</label>
+        <select id="courseId" formControlName="courseId" class="form-control">
+          <option value="" disabled selected>Select Course</option>
+          <option *ngFor="let course of courses" [value]="course.course_id">
+            {{ course.course_name }} (Level: {{ course.level }})
+          </option>
+        </select>
+        <div *ngIf="enrollmentForm.get('courseId')?.invalid && enrollmentForm.get('courseId')?.touched" class="error-text">
+          Please select a course
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="enrollmentDate">Enrollment Date:</label>
+        <input 
+          id="enrollmentDate" 
+          formControlName="enrollmentDate" 
+          type="date" 
+          class="form-control"
+        />
+        <div *ngIf="enrollmentForm.get('enrollmentDate')?.invalid && enrollmentForm.get('enrollmentDate')?.touched" class="error-text">
+          Please select an enrollment date
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          [disabled]="enrollmentForm.invalid || submitting" 
+          class="btn btn-primary"
+        >
+          <span *ngIf="submitting">Processing...</span>
+          <span *ngIf="!submitting">{{ editingEnrollment ? 'Update' : 'Add' }} Enrollment</span>
+        </button>
+        <button 
+          type="button" 
+          *ngIf="editingEnrollment" 
+          (click)="cancelEdit()" 
+          class="btn btn-secondary"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Enrollments Table -->
+  <div class="table-section">
+    <h3>Current Enrollments</h3>
+    <div *ngIf="enrollments.length === 0 && !loading" class="no-data">
+      No enrollments found. Add a new enrollment above.
+    </div>
+    
+    <table *ngIf="enrollments.length > 0" class="enrollment-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Course</th>
+          <th>Enrollment Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let enrollment of enrollments">
+          <td>{{ enrollment.enrollment_id }}</td>
+          <td>{{ getStudentName(enrollment.student_id) }}</td>
+          <td>{{ getCourseName(enrollment.course_id) }}</td>
+          <td>{{ enrollment.enrollment_date | date:'mediumDate' }}</td>
+          <td class="actions">
+            <button (click)="startEdit(enrollment)" class="btn btn-small btn-edit">Edit</button>
+            <button (click)="deleteEnrollment(enrollment)" class="btn btn-small btn-delete">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
