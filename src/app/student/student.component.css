@@ -417,3 +417,92 @@ textarea:focus {
   background: #eaf6ff;
   box-shadow: 0 0 0 2px #2196f355;
 }
+
+/* Modern Courses & Grades Section */
+.modern-courses-section {
+  margin-top: 24px;
+}
+
+.modern-courses-label {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.modern-courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modern-course-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbfc;
+  border: 2px solid #f0f4fa;
+  border-radius: 14px;
+  padding: 18px 24px;
+  min-height: 56px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #34495e;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.04);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.modern-course-box.selected {
+  border-color: #3498db;
+  background: #eaf3fd;
+  box-shadow: 0 4px 16px rgba(52,152,219,0.10);
+}
+
+.modern-course-name {
+  color: #3498db;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.modern-grade-input {
+  width: 70px;
+  padding: 7px 10px;
+  border: 1.5px solid #b2bec3;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  background: #f7faff;
+  margin-left: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modern-grade-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52,152,219,0.10);
+  outline: none;
+}
+
+.selected-courses-summary {
+  margin-top: 24px;
+  background: #f5f8fd;
+  border: 1.5px solid #b2d5f7;
+  border-radius: 12px;
+  padding: 18px 24px;
+  color: #3498db;
+  font-weight: 500;
+}
+
+.selected-courses-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.selected-grade {
+  margin-left: 24px;
+  color: #3498db;
+  font-weight: 500;
+}

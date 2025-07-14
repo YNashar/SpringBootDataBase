@@ -8,13 +8,15 @@ import { AppComponent } from './app.component';
 import { StudentComponent } from './student/student.component';
 import { EnrollmentsComponent } from './enrollments/enrollments.component';
 import { CoursesComponent } from './courses/courses.component';
+import { FacultiesComponent } from './faculties/faculties.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     StudentComponent,
     EnrollmentsComponent,
-    CoursesComponent
+    CoursesComponent,
+    FacultiesComponent
   ],
   imports: [
     BrowserModule,

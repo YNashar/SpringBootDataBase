@@ -27,26 +27,41 @@
         </div>
         <div class="form-group">
           <label for="level">Level *</label>
-          <select id="level" formControlName="level">
-            <option value="1">Level 1</option>
-            <option value="2">Level 2</option>
-            <option value="3">Level 3</option>
+          <select id="level" formControlName="level" (change)="onLevelChange()">
+            <option *ngFor="let level of levels" [value]="level">Level {{ level }}</option>
           </select>
         </div>
       </div>
-      <div *ngIf="studentForm.get('facultyId')?.value > 0 && courses.length > 0" class="form-group">
-        <label>Courses & Grades</label>
-        <div class="courses-grades-list">
-          <div *ngFor="let course of courses" class="course-grade-item">
-            <label>
-              <input type="checkbox" [value]="course.courseId!" (change)="onCourseCheckboxChange(course, $event)" [checked]="isCourseSelected(course.courseId!)" />
-              {{ course.courseName }}
-            </label>
-            <input *ngIf="isCourseSelected(course.courseId!)" type="number" min="0" max="100" placeholder="Grade"
+      <div *ngIf="studentForm.get('facultyId')?.value > 0 && filteredCourses.length > 0" class="modern-courses-section">
+        <label class="modern-courses-label">Courses & Grades</label>
+        <div class="modern-courses-list">
+          <div
+            *ngFor="let course of filteredCourses"
+            class="modern-course-box"
+            [class.selected]="isCourseSelected(course.courseId!)"
+            (click)="toggleCourseSelection(course)"
+          >
+            <span class="modern-course-name">{{ course.courseName }}</span>
+            <input
+              *ngIf="isCourseSelected(course.courseId!)"
+              type="number"
+              min="0"
+              max="100"
+              placeholder="0"
               [value]="selectedCoursesWithGrades[course.courseId!]"
+              (click)="$event.stopPropagation()"
               (input)="onGradeInput(course.courseId!, $event)"
-              class="grade-input" />
+              class="modern-grade-input"
+            />
           </div>
+        </div>
+      </div>
+
+      <div *ngIf="selectedCoursesWithGrades | keyvalue as courseIds" class="selected-courses-summary">
+        <span class="selected-courses-title">Selected Courses</span>
+        <div *ngFor="let entry of courseIds">
+          <span>{{ getCourseName(+entry.key) }}</span>
+          <span class="selected-grade">Grade: {{ getLetterGrade(entry.value) }}</span>
         </div>
       </div>
       <div class="form-actions">

@@ -6,6 +6,7 @@ import { Faculty } from '../models/faculty.model';
 import { Course } from '../models/course.model';
 import { Enrollment } from '../models/enrollment.model';
 import { Grade } from '../models/grade.model';
+import { CourseFacultyLevelService } from '../services/course-faculty-level.service';
 
 @Component({
   selector: 'app-student',
@@ -29,13 +30,17 @@ export class StudentComponent implements OnInit {
   showGradeSection = false;
   editingStudent: Student | null = null;
   selectedCoursesWithGrades: { [courseId: number]: number } = {};
+  filteredCourses: Course[] = [];
+  levels: number[] = [1, 2, 3, 4];
   constructor(
     private studentManagementService: StudentManagementService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private courseFacultyLevelService: CourseFacultyLevelService
   ) {
     this.studentForm = this.fb.group({
       studentName: ['', [Validators.required, Validators.minLength(2)]],
       facultyId: [0, [Validators.required, Validators.min(1)]],
+      level: [1, [Validators.required, Validators.min(1), Validators.max(4)]], // max(4) for level 4
       nationalId: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), this.nationalIdValidator]]
     });
     this.enrollmentForm = this.fb.group({
@@ -59,6 +64,7 @@ export class StudentComponent implements OnInit {
   ngOnInit(): void {
     this.loadStudents();
     this.loadFaculties();
+    this.filteredCourses = [];
   }
   loadStudents(): void {
     this.studentManagementService.getStudents().subscribe({
@@ -82,17 +88,35 @@ export class StudentComponent implements OnInit {
   }
   onFacultyChange(): void {
     const facultyId = this.studentForm.get('facultyId')?.value;
-    if (facultyId && facultyId > 0) {
+    const level = this.studentForm.get('level')?.value;
+    if (facultyId && facultyId > 0 && level && level > 0) {
       this.studentManagementService.getCoursesByFaculty(facultyId).subscribe({
         next: (data: Course[]) => {
           this.courses = data;
+          this.courseFacultyLevelService.getByFacultyAndLevel(facultyId, level).subscribe({
+            next: (links) => {
+              const allowedCourseIds = links.map((link: any) => link.courseId);
+              this.filteredCourses = this.courses.filter(course => allowedCourseIds.includes(course.courseId));
+              console.log('All courses:', this.courses);
+              console.log('Allowed course IDs:', allowedCourseIds);
+              console.log('Filtered courses:', this.filteredCourses);
+            },
+            error: () => {
+              this.filteredCourses = [];
+            }
+          });
         },
-        error: (err: any) => {
+        error: () => {
+          this.filteredCourses = [];
         }
       });
     } else {
-      this.courses = [];
+      this.filteredCourses = [];
     }
+  }
+
+  onLevelChange(): void {
+    this.onFacultyChange();
   }
   selectStudent(student: Student): void {
     this.selectedStudent = student;
@@ -125,6 +149,13 @@ export class StudentComponent implements OnInit {
   isCourseSelected(courseId: number): boolean {
     return this.selectedCoursesWithGrades.hasOwnProperty(courseId);
   }
+  toggleCourseSelection(course: Course): void {
+    if (this.isCourseSelected(course.courseId!)) {
+      delete this.selectedCoursesWithGrades[course.courseId!];
+    } else {
+      this.selectedCoursesWithGrades[course.courseId!] = 0;
+    }
+  }
   addStudent(): void {
     this.validationMessage = '';
     if (this.studentForm.invalid) {
@@ -132,12 +163,12 @@ export class StudentComponent implements OnInit {
       return;
     }
     const newStudent: Student = this.studentForm.value;
-    // Prepare courses and grades
+    
     const coursesWithGrades = Object.entries(this.selectedCoursesWithGrades).map(([courseId, grade]) => ({
       courseId: Number(courseId),
       grade: Number(grade)
     }));
-    // TODO: send coursesWithGrades to backend as needed
+    
     this.studentManagementService.addStudent(newStudent).subscribe({
       next: (student) => {
         this.studentForm.reset({
@@ -159,18 +190,18 @@ export class StudentComponent implements OnInit {
   startEditStudent(student: Student): void {
     this.editingStudent = student;
     this.studentForm.patchValue(student);
-    // TODO: Load student's courses and grades if needed
+   
     this.selectedCoursesWithGrades = {};
   }
   updateStudent(): void {
     if (!this.editingStudent || this.studentForm.invalid) return;
     const updatedStudent: Student = { ...this.editingStudent, ...this.studentForm.value };
-    // Prepare courses and grades
+    
     const coursesWithGrades = Object.entries(this.selectedCoursesWithGrades).map(([courseId, grade]) => ({
       courseId: Number(courseId),
       grade: Number(grade)
     }));
-    // TODO: send coursesWithGrades to backend as needed
+    
     this.studentManagementService.updateStudent(updatedStudent).subscribe({
       next: () => {
         this.editingStudent = null;
@@ -287,6 +318,19 @@ export class StudentComponent implements OnInit {
   getCourseLevel(courseId: number): string {
     const course = this.courses.find(c => c.courseId === courseId);
     return course ? course.level.toString() : '-';
+  }
+  getLetterGrade(grade: number): string {
+    if (grade >= 95) return 'A+';
+    if (grade >= 90) return 'A';
+    if (grade >= 85) return 'A-';
+    if (grade >= 80) return 'B+';
+    if (grade >= 75) return 'B';
+    if (grade >= 70) return 'B-';
+    if (grade >= 65) return 'C+';
+    if (grade >= 60) return 'C';
+    if (grade >= 55) return 'C-';
+    if (grade >= 50) return 'D';
+    return 'F';
   }
   private handleValidationErrors(): void {
     const nationalIdControl = this.studentForm.get('nationalId');

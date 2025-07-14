@@ -1,6 +1,77 @@
 <div class="faculties-container">
-  <h2>Faculties</h2>
-  <div class="faculties-content">
-    <p>Faculties component works!</p>
+  <h2>Course-Faculty-Level Management</h2>
+  
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+
+  <div class="section">
+    <h3>{{ editingItem ? 'Edit' : 'Add' }} Course-Faculty-Level Relationship</h3>
+    <form [formGroup]="courseFacultyLevelForm" (ngSubmit)="onSubmit()" class="relationship-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="courseId">Course *</label>
+          <select id="courseId" formControlName="courseId">
+            <option value="0">Select Course</option>
+            <option *ngFor="let course of filteredCourses" [value]="course.course_id">
+              {{ course.course_name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="facultyId">Faculty *</label>
+          <select id="facultyId" formControlName="facultyId" (change)="onFacultyOrLevelChange()">
+            <option value="0">Select Faculty</option>
+            <option *ngFor="let faculty of faculties" [value]="faculty.facultyId">
+              {{ faculty.facultyName }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="level">Level *</label>
+          <select id="level" formControlName="level" (change)="onFacultyOrLevelChange()">
+            <option *ngFor="let level of levels" [value]="level">Level {{ level }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="courseFacultyLevelForm.invalid" class="btn-primary">
+          {{ editingItem ? 'Update' : 'Add' }} Relationship
+        </button>
+        <button type="button" *ngIf="editingItem" (click)="resetForm()" class="btn-secondary">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="section">
+    <h3>Course-Faculty-Level Relationships</h3>
+    <div class="table-container">
+      <table class="relationships-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Course</th>
+            <th>Faculty</th>
+            <th>Level</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of courseFacultyLevels">
+            <td>{{ item.id }}</td>
+            <td>{{ item.courseName || getCourseName(item.courseId) }}</td>
+            <td>{{ item.facultyName || getFacultyName(item.facultyId) }}</td>
+            <td>{{ item.level }}</td>
+            <td>
+              <button (click)="editItem(item)" class="btn-edit">Edit</button>
+              <button (click)="deleteItem(item.id!)" class="btn-delete">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div> 
